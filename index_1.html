@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yuqi Chen — Projects</title>
+  <meta name="description" content="Data science projects by Yuqi Chen: topic modeling of Federal Reserve minutes, natural gas storage forecasting, and a live portfolio tracker.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header class="intro">
+      <h1>Yuqi Chen</h1>
+      <p>Data science student. I build data pipelines, ML models, and small tools for questions I find interesting</p>
+      <nav>
+        <a href="https://github.com/YuqiChenS">GitHub</a>
+        <a href="mailto:yuqichen998@gmail.com">Email</a>
+      </nav>
+    </header>
+
+    <section aria-labelledby="projects-heading">
+      <h2 id="projects-heading">Projects</h2>
+
+      <!-- Project 1 -->
+      <article class="project">
+        <div class="meta">
+          <span>NLP · Data engineering</span>
+        </div>
+        <h3>What the Fed talks about: topic modeling FOMC minutes</h3>
+        <p>
+          A pipeline that scrapes every Federal Open Market Committee meeting's minutes from 1993 to now,
+          stores them in MongoDB, and uses LDA topic modeling to show what the Fed talked about over time.
+          The Fed's website has used several layouts over the years, so there's a scraper for each era. Minutes are
+          lemmatized with spaCy, filtered to nouns, stripped of stopwords and FOMC boilerplate, and joined into
+          bigrams like <code>balance_sheet</code> and <code>swap_arrangement</code> before training a gensim LDA model.
+          Each meeting's topic mix is saved back to Mongo, and saved models are kept by date so retraining
+          never overwrites an older run.
+        </p>
+        <p>
+          I compared several settings and chose four topics. The topics were easier to tell apart and name,
+          though this wasn't the setting with the highest coherence score.
+        </p>
+
+        <table class="topics">
+          <thead>
+            <tr><th>Topic</th><th>What it's about</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Balance Sheet</td><td>Asset holdings, credit markets and financial stability, mostly after 2008</td></tr>
+            <tr><td>Currency Operation</td><td>Reports and votes on the Fed's trading in Treasuries and foreign currencies</td></tr>
+            <tr><td>Over-expansion</td><td>A strong economy and rate hikes to cool it down</td></tr>
+            <tr><td>Economic Slowdown</td><td>A weak economy, rate cuts and waiting for a recovery</td></tr>
+          </tbody>
+        </table>
+
+        <p>
+          A Streamlit dashboard shows each topic's share across all years. For any year it lists that year's
+          meetings with their main topic and links to the minutes. Clicking a meeting shows its topic mix and opens
+          a pyLDAvis map on its main topic.
+        </p>
+
+        <p class="stack">Python · MongoDB · BeautifulSoup · spaCy · NLTK · gensim · pyLDAvis · Streamlit</p>
+        <p class="links"><a href="https://github.com/YuqiChenS/FOMC_Transcript_DB">Code on GitHub →</a></p>
+      </article>
+
+      <!-- Project 2 -->
+      <article class="project">
+        <div class="meta">
+          <span>Time series · Bayesian stats</span>
+          <span>Team project, DS 4420</span>
+        </div>
+        <h3>Forecasting U.S. natural gas storage</h3>
+        <p>
+          Storage levels drive natural gas prices and the derivatives that track them, so a model that
+          predicts them accurately and explainably is useful. Using the EIA's weekly storage data, we
+          compared a seasonal ARIMA model against a Bayesian linear regression on lagged values that we fit with a
+          hand-written Gibbs sampler in R.
+          Storage falls every winter as heating demand rises, so a 52-week seasonal term does most of the work.
+        </p>
+        <p>
+          After hyperparameter tuning, the best SARIMA (26,0,5)×(2,1,2)<sub>52</sub> reached an
+          <strong>RMSE of 131 Bcf</strong> on held-out 2025–2026 data. The Bayesian model's RMSE was about 598 Bcf.
+        </p>
+
+        <figure>
+          <img src="assets/sarima-forecast.png" width="1200" height="400"
+               alt="Line chart of actual versus SARIMA-predicted natural gas storage from early 2024 to early 2026; the predicted curve closely follows the seasonal peaks near 4,000 Bcf and troughs near 1,800 Bcf.">
+          <figcaption>An earlier SARIMA fit (5,0,5)×(2,1,2)<sub>52</sub>, predicted vs. actual storage.</figcaption>
+        </figure>
+
+        <p class="stack">Python · statsmodels · R · Gibbs sampling · walk-forward CV</p>
+        <p class="links"><a href="https://github.com/Christian-Limb/ds4420_final_project">Code on GitHub →</a></p>
+      </article>
+
+      <!-- Project 3 -->
+      <article class="project">
+        <div class="meta">
+          <span>Full-stack · Deployed app</span>
+        </div>
+        <h3>Am I Underwater? A portfolio tracker</h3>
+        <p>
+          A no-login stock portfolio tracker. Anyone can create a portfolio and bookmark its private link.
+          Add holdings with shares and cost basis, and a live table shows each position's dollar and
+          percentage return, with prices refreshing every 30 seconds from the Finnhub API.
+          Data lives in SQLite on a persistent volume, and the app runs in Docker on Fly.io.
+        </p>
+        <p class="stack">Node.js · Express · SQLite · Finnhub API · Docker · Fly.io</p>
+        <p class="links"><a href="https://am-i-underwater.fly.dev">Live app →</a></p>
+      </article>
+    </section>
+
+    <footer>
+      <p>© 2026 Yuqi Chen</p>
+    </footer>
+  </main>
+</body>
+</html>
