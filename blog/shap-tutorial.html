@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A friendly tutorial to SHAP — Yuqi Chen</title>
+  <meta name="description" content="A plain-language walkthrough of SHAP (SHapley Additive exPlanations): how feature importance for a single prediction is computed from subsets of features and the Shapley kernel.">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '\\[', right: '\\]', display: true}, {left: '\\(', right: '\\)', display: false}]});"></script>
+</head>
+<body>
+  <main class="post">
+    <a class="back" href="../index.html">← Yuqi Chen</a>
+
+    <article>
+      <h1>A friendly tutorial to SHAP</h1>
+      <p class="date"><time datetime="2026-11-06">November 6, 2026</time></p>
+
+      <p>
+        SHAP (SHapley Additive exPlanations) is a framework that outputs a feature-importance
+        coefficient for each feature, for a single prediction of any model. This tutorial only covers
+        models with numerical output on tabular data, and does not cover TreeSHAP, the variant for
+        tree-based methods. The original paper by Lundberg and Lee is quite dense mathematically, so
+        here is a friendlier walkthrough.
+      </p>
+
+      <p>
+        We have \(n\) observations, a model \(f\), and a feature space \(F\). The feature space is
+        the set of features the model takes as input. Subtracting a feature from this set means that
+        feature is absent.
+      </p>
+
+      <p>
+        To calculate the feature importance, i.e. the SHAP coefficient, for feature \(i\), subtract
+        it from the feature space \(F\), denoted \(F \setminus \{i\}\). Then generate all subsets of
+        \(F \setminus \{i\}\), each denoted \(S\). For each subset, we can measure how the model's
+        output changes when feature \(i\) is added to \(S\):
+      </p>
+
+      \[
+        f_{S \cup \{i\}}\bigl(x_{S \cup \{i\}}\bigr) - f_{S}(x_{S})
+      \]
+
+      <p>
+        How can \(f\), which is defined over the full set of features \(F\), be run with absent
+        features? For an absent feature, hold the other features at their values in the observation
+        we are trying to explain, let the absent feature take every value it has in the data,
+        generate a prediction for each of those values, and finally average over all of those
+        predictions. Above, \(x_S\) takes the original values in the observation, not a binary
+        indicator of which features are present.
+      </p>
+
+      <p>
+        Written out, with \(\bar{S} = F \setminus S\) for the absent features and \(x^{(j)}\)
+        for the \(j\)-th observation in the data:
+      </p>
+
+      \[
+        f_{S}(x_{S}) = \frac{1}{n} \sum_{j=1}^{n} f\bigl(x_{S},\, x^{(j)}_{\bar{S}}\bigr)
+      \]
+
+      <p>
+        Each term keeps the present features at their observed values and fills the absent ones
+        from row \(j\). When several features are absent, their values all come from the same row.
+      </p>
+
+      <p>
+        The SHAP value for feature \(i\) is the sum of these \(2^{|F|-1}\) differences, each
+        weighted by the Shapley kernel. This matches equation 4 in the paper:
+      </p>
+
+      \[
+        \phi_i = \sum_{S \subseteq F \setminus \{i\}}
+          \frac{|S|!\,(|F|-|S|-1)!}{|F|!}
+          \Bigl[f_{S \cup \{i\}}\bigl(x_{S \cup \{i\}}\bigr) - f_{S}(x_{S})\Bigr]
+      \]
+
+      <div class="refs">
+        <p>
+          Scott M. Lundberg and Su-In Lee.
+          <a href="https://arxiv.org/abs/1705.07874">A Unified Approach to Interpreting Model Predictions</a>.
+          Advances in Neural Information Processing Systems 30, 2017.
+        </p>
+      </div>
+    </article>
+
+    <footer>
+      <p>© 2026 Yuqi Chen</p>
+    </footer>
+  </main>
+</body>
+</html>
